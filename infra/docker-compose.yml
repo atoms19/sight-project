@@ -1,0 +1,203 @@
+# Sight Project – Docker Compose
+# Phase 5: 8-service orchestration
+#
+# Services:
+#   1. broker    – Mosquitto MQTT
+#   2. influxdb  – InfluxDB 2 TSDB (90-day retention via API)
+#   3. redis     – Redis cache (live state)
+#   4. ingest    – Python MQTT→InfluxDB/Redis ingest
+#   5. api       – FastAPI REST + WebSocket backend
+#   6. ml-agent  – Python ML/anomaly agent
+#   7. ui        – React 18 Vite frontend (built)
+#   8. proxy     – Nginx reverse proxy
+#
+# Optional:
+#   grafana      – Grafana dashboards (provisioned)
+
+version: "3.9"
+
+networks:
+  sight-net:
+    driver: bridge
+
+volumes:
+  influx-data:
+  redis-data:
+  grafana-data:
+  mosquitto-data:
+  mosquitto-log:
+  models-data:
+
+x-common-env: &common-env
+  MQTT_HOST:     broker
+  MQTT_PORT:     "1883"
+  INFLUX_URL:    http://influxdb:8086
+  INFLUX_TOKEN:  sight-super-secret-token
+  INFLUX_ORG:    sight
+  INFLUX_BUCKET: telemetry
+  REDIS_HOST:    redis
+  REDIS_PORT:    "6379"
+
+services:
+
+  # ── 1. MQTT Broker ──────────────────────────────────────────────────────────
+  broker:
+    image: eclipse-mosquitto:2.0.18
+    container_name: sight-broker
+    restart: unless-stopped
+    networks: [sight-net]
+    ports:
+      - "1883:1883"
+      - "9001:9001"   # WebSocket listener for browser clients
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+
+  # ── 2. InfluxDB TSDB ────────────────────────────────────────────────────────
+  influxdb:
+    image: influxdb:2.7
+    container_name: sight-influxdb
+    restart: unless-stopped
+    networks: [sight-net]
+    ports:
+      - "8086:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE:        setup
+      DOCKER_INFLUXDB_INIT_USERNAME:    admin
+      DOCKER_INFLUXDB_INIT_PASSWORD:    sight-admin-password
+      DOCKER_INFLUXDB_INIT_ORG:         sight
+      DOCKER_INFLUXDB_INIT_BUCKET:      telemetry
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: sight-super-secret-token
+      DOCKER_INFLUXDB_INIT_RETENTION:   90d
+    volumes:
+      - influx-data:/var/lib/influxdb2
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── 3. Redis Cache ──────────────────────────────────────────────────────────
+  redis:
+    image: redis:7.2-alpine
+    container_name: sight-redis
+    restart: unless-stopped
+    networks: [sight-net]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── 4. MQTT Ingest Service ──────────────────────────────────────────────────
+  ingest:
+    build:
+      context: ../edge-server
+      dockerfile: Dockerfile.ingest
+    container_name: sight-ingest
+    restart: unless-stopped
+    networks: [sight-net]
+    environment:
+      <<: *common-env
+      MQTT_TOPIC: "sight/meters/+/telemetry"
+      REDIS_TTL:  "10"
+    depends_on:
+      influxdb: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+      broker:   { condition: service_started }
+
+  # ── 5. FastAPI Backend ──────────────────────────────────────────────────────
+  api:
+    build:
+      context: ../edge-server
+      dockerfile: Dockerfile.api
+    container_name: sight-api
+    restart: unless-stopped
+    networks: [sight-net]
+    ports:
+      - "8000:8000"
+    environment:
+      <<: *common-env
+    depends_on:
+      influxdb: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+      broker:   { condition: service_started }
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── 6. ML Agent ─────────────────────────────────────────────────────────────
+  ml-agent:
+    build:
+      context: ../ml-pipeline
+      dockerfile: Dockerfile
+    container_name: sight-ml-agent
+    restart: unless-stopped
+    networks: [sight-net]
+    environment:
+      <<: *common-env
+      MODEL_PATH:       /models/nilm_rf.pkl
+      AGENT_INTERVAL:   "1.0"
+      ANOMALY_THRESHOLD: "1.5"
+      ROLLING_WINDOW:   "604800"
+    volumes:
+      - models-data:/models
+    depends_on:
+      redis:  { condition: service_healthy }
+      broker: { condition: service_started }
+
+  # ── 7. React UI ─────────────────────────────────────────────────────────────
+  ui:
+    build:
+      context: ../dashboard
+      dockerfile: Dockerfile
+    container_name: sight-ui
+    restart: unless-stopped
+    networks: [sight-net]
+    environment:
+      VITE_API_BASE: ""
+
+  # ── 8. Nginx Reverse Proxy ──────────────────────────────────────────────────
+  proxy:
+    image: nginx:1.27-alpine
+    container_name: sight-proxy
+    restart: unless-stopped
+    networks: [sight-net]
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+      - ui
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ── Optional: Grafana ───────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana-oss:10.4.4
+    container_name: sight-grafana
+    restart: unless-stopped
+    networks: [sight-net]
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER:     admin
+      GF_SECURITY_ADMIN_PASSWORD: sight-grafana
+      GF_INSTALL_PLUGINS:         ""
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      influxdb: { condition: service_healthy }

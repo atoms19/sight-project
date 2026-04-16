@@ -1,0 +1,8 @@
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.4.2
+joblib==1.4.2
+influxdb-client==1.43.0
+redis==5.0.4
+paho-mqtt==1.6.1
+python-dotenv==1.0.1

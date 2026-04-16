@@ -1,0 +1,15 @@
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB-Sight
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    jsonData:
+      version: Flux
+      organization: sight
+      defaultBucket: telemetry
+    secureJsonData:
+      token: sight-super-secret-token
+    isDefault: true
+    editable: true
