@@ -9,6 +9,7 @@ import asyncio
 import json
 import logging
 import os
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Any
 
@@ -42,34 +43,35 @@ MQTT_PORT  = int(os.getenv("MQTT_PORT", "1883"))
 WS_PUSH_INTERVAL = 1.0  # seconds (1 Hz)
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Lifespan – replaces deprecated @app.on_event
+# ──────────────────────────────────────────────────────────────────────────────
+redis_pool: aioredis.Redis | None = None
+influx_client: InfluxDBClientAsync | None = None
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):  # noqa: ARG001
+    global redis_pool, influx_client
+    redis_pool    = aioredis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+    influx_client = InfluxDBClientAsync(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
+    logger.info("Sight API started")
+    yield
+    if redis_pool:
+        await redis_pool.aclose()
+    if influx_client:
+        await influx_client.close()
+
+
+# ──────────────────────────────────────────────────────────────────────────────
 # App
 # ──────────────────────────────────────────────────────────────────────────────
-app = FastAPI(title="Sight API", version="1.0.0")
+app = FastAPI(title="Sight API", version="1.0.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-redis_pool: aioredis.Redis | None = None
-influx_client: InfluxDBClientAsync | None = None
-
-
-@app.on_event("startup")
-async def startup() -> None:
-    global redis_pool, influx_client
-    redis_pool = aioredis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
-    influx_client = InfluxDBClientAsync(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
-    logger.info("Sight API started")
-
-
-@app.on_event("shutdown")
-async def shutdown() -> None:
-    if redis_pool:
-        await redis_pool.aclose()
-    if influx_client:
-        await influx_client.close()
 
 
 # ──────────────────────────────────────────────────────────────────────────────

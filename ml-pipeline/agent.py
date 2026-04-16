@@ -12,6 +12,12 @@ import os
 import time
 from datetime import timezone, datetime
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 import paho.mqtt.publish as mqtt_publish
 import redis
 
@@ -20,14 +26,6 @@ from nilm.features import extract_features
 from nilm.classifier import predict, load_model
 
 import pandas as pd
-
-load_dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
-
-try:
-    from dotenv import load_dotenv
-    load_dotenv(load_dotenv_path)
-except ImportError:
-    pass
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("sight.agent")

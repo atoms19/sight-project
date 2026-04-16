@@ -11,6 +11,8 @@ jobs:
   python-tests:
     name: Python – Pytest
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -43,6 +45,8 @@ jobs:
   js-tests:
     name: React – Jest
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -66,6 +70,8 @@ jobs:
   docker-smoke:
     name: Docker Compose – smoke test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: [python-tests, js-tests]
 
     steps:
