@@ -1,0 +1,85 @@
+name: Sight CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Python tests (Pytest) ────────────────────────────────────────────────
+  python-tests:
+    name: Python – Pytest
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ML pipeline deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ml-pipeline/requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Install edge-server deps
+        run: |
+          pip install -r edge-server/requirements.txt
+
+      - name: Run Pytest
+        run: |
+          pytest tests/python/ \
+            --tb=short \
+            --cov=ml-pipeline \
+            --cov=edge-server \
+            --cov-report=term-missing \
+            -v
+
+  # ── JavaScript tests (Jest) ──────────────────────────────────────────────
+  js-tests:
+    name: React – Jest
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: dashboard/package-lock.json
+
+      - name: Install dashboard deps
+        working-directory: dashboard
+        run: npm install
+
+      - name: Run Jest
+        working-directory: dashboard
+        run: npm test
+
+  # ── Docker Compose smoke-test ────────────────────────────────────────────
+  docker-smoke:
+    name: Docker Compose – smoke test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs: [python-tests, js-tests]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate docker-compose.yml
+        working-directory: infra
+        run: docker compose config --quiet
+
+      - name: Validate Nginx config
+        run: docker run --rm -v $PWD/infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro nginx:1.27-alpine nginx -t
