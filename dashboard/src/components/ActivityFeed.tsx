@@ -35,7 +35,7 @@ const MOCK_EVENTS: ActivityEvent[] = [
   {
     id: '2', kind: 'warning',
     title:  'Power spike detected',
-    detail: 'esp32_meter_01 – 1 247 W (threshold 1 000 W)',
+    detail: 'esp32_meter_01 – 1,247 W (threshold 1,000 W)',
     timestamp: new Date(Date.now() - 8 * 60_000).toISOString(),
   },
   {

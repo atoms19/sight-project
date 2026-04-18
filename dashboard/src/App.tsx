@@ -80,10 +80,10 @@ const App: React.FC = () => {
         </div>
 
         <nav style={styles.headerNav} aria-label="Dashboard navigation">
-          <a href="#kpis"      style={styles.navLink}>Overview</a>
-          <a href="#charts"    style={styles.navLink}>Charts</a>
-          <a href="#activity"  style={styles.navLink}>Activity</a>
-          <a href="#devices"   style={styles.navLink}>Devices</a>
+          <a href="#kpis"      className="nav-link" style={styles.navLink}>Overview</a>
+          <a href="#charts"    className="nav-link" style={styles.navLink}>Charts</a>
+          <a href="#activity"  className="nav-link" style={styles.navLink}>Activity</a>
+          <a href="#devices"   className="nav-link" style={styles.navLink}>Devices</a>
         </nav>
 
         <div style={styles.headerControls}>
@@ -186,7 +186,7 @@ const App: React.FC = () => {
       <footer style={styles.footer}>
         <span>Sight v1.0.0 · zero-cloud · edge-AI</span>
         <span>·</span>
-        <a href="https://github.com/atoms19/sight-project" style={{ color: '#475569' }}>
+        <a href="https://github.com/atoms19/sight-project" style={{ color: 'var(--color-text-muted)' }}>
           GitHub
         </a>
       </footer>

@@ -36,7 +36,7 @@ function buildMockData(seed: string): DailyEnergy[] {
   return Array.from({ length: 7 }, (_, i) => {
     const d   = new Date(now);
     d.setDate(now.getDate() - (6 - i));
-    const pseudo = ((base * (i + 1) * 1234567) % 800) + 200; // 200–1000 Wh range
+    const pseudo = ((base * (i + 1) * 1234567) % 800) + 200; // 200–999 Wh range
     return { day: days[d.getDay()], energy_wh: Math.round(pseudo) };
   });
 }

@@ -79,6 +79,12 @@ button {
   border-bottom: 1px solid #334155;
 }
 
+/* ── Nav link hover (handled via CSS since inline styles can't use :hover) ── */
+a.nav-link:hover {
+  color: #e2e8f0;
+  background: #1e293b;
+}
+
 /* ── Activity feed hover ── */
 .activity-item:hover {
   background: #0f172a;
