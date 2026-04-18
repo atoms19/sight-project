@@ -13,13 +13,18 @@ body {
 }
 
 :root {
-  --color-primary:   #38bdf8;
-  --color-success:   #4ade80;
-  --color-warning:   #fb923c;
-  --color-danger:    #f87171;
-  --color-surface:   #1e293b;
-  --color-border:    #334155;
-  --color-text-muted:#94a3b8;
+  --color-primary:    #38bdf8;
+  --color-success:    #4ade80;
+  --color-warning:    #fb923c;
+  --color-danger:     #f87171;
+  --color-surface:    #1e293b;
+  --color-border:     #334155;
+  --color-text-muted: #94a3b8;
+  --color-bg:         #0f172a;
+
+  --radius-md: 10px;
+  --gap-md:    16px;
+  --gap-lg:    24px;
 }
 
 a {
@@ -29,4 +34,95 @@ a {
 
 button {
   cursor: pointer;
+  font-family: inherit;
+}
+
+/* ── Responsive layout helpers ── */
+
+/* KPI grid: 4 cols on desktop, 2 on tablet, 1 on mobile */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--gap-md);
+}
+
+/* Main content two-column: charts left, side panel right */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: var(--gap-md);
+  align-items: start;
+}
+
+/* Bottom two-column: activity feed + quick actions */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap-md);
+  align-items: start;
+}
+
+/* Quick actions button grid */
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* Device table toolbar */
+.table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #334155;
+}
+
+/* ── Nav link hover (handled via CSS since inline styles can't use :hover) ── */
+a.nav-link:hover {
+  color: #e2e8f0;
+  background: #1e293b;
+}
+
+/* ── Activity feed hover ── */
+.activity-item:hover {
+  background: #0f172a;
+}
+
+/* ── Button focus rings ── */
+button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+input:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+/* ── Tablet: ≤ 1024px ── */
+@media (max-width: 1024px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Mobile: ≤ 640px ── */
+@media (max-width: 640px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
