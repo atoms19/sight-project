@@ -45,6 +45,20 @@ export interface SetRelayResponse {
   status: string;
 }
 
+export interface EsgSummaryResponse {
+  range: string;
+  total_energy_kwh: number;
+  total_co2_kg: number;
+  saved_co2_kg: number;
+  intensity_factor: number;
+}
+
+export interface WeatherConfig {
+  city: string;
+  lat: number;
+  lon: number;
+}
+
 export class SightAPI {
   /**
    * Helper to execute fetch requests and parse JSON.
@@ -106,6 +120,34 @@ export class SightAPI {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ relay: relayState }),
+    });
+  }
+
+  /**
+   * Get the ESG Carbon Footprint summary across the facility.
+   * @param range InfluxDB range string (e.g., "-30d", "-1y"). Defaults to "-30d".
+   */
+  static async getEsgSummary(range: string = '-30d'): Promise<EsgSummaryResponse> {
+    return this.request(`/esg/summary?range=${encodeURIComponent(range)}`);
+  }
+
+  /**
+   * Get the current weather forecast location config.
+   */
+  static async getWeatherConfig(): Promise<WeatherConfig> {
+    return this.request('/weather/config');
+  }
+
+  /**
+   * Set the weather forecast location config.
+   */
+  static async setWeatherConfig(config: WeatherConfig): Promise<{status: string, config: WeatherConfig}> {
+    return this.request('/weather/config', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(config),
     });
   }
 }

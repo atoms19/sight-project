@@ -1,5 +1,7 @@
 import React from 'react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { EsgReport } from '../components/EsgReport';
+import { WeatherConfigPanel } from '../components/WeatherConfigPanel';
 
 const mockDataTime = [
     { time: '00:00', load: 4000, capacity: 5000 },
@@ -29,6 +31,12 @@ const Analytics: React.FC = () => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 'var(--gap-lg)' }}>
+
+                {/* ESG Report */}
+                <EsgReport />
+
+                {/* Weather Config Panel */}
+                <WeatherConfigPanel />
 
                 {/* Load over Time */}
                 <div className="glass" style={{ padding: 24, borderRadius: 'var(--radius-lg)' }}>

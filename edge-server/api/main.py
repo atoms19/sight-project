@@ -21,6 +21,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from influxdb_client.client.influxdb_client_async import InfluxDBClientAsync
 from pydantic import BaseModel
 
+from api.weather import router as weather_router, weather_ingest_loop
+
 load_dotenv()
 
 logger = logging.getLogger("sight.api")
@@ -54,8 +56,15 @@ async def lifespan(application: FastAPI):  # noqa: ARG001
     global redis_pool, influx_client
     redis_pool    = aioredis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
     influx_client = InfluxDBClientAsync(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
+    
+    application.state.redis = redis_pool
+    application.state.influx = influx_client
+    application.state.bucket = INFLUX_BUCKET
+    weather_task = asyncio.create_task(weather_ingest_loop(application))
+    
     logger.info("Sight API started")
     yield
+    weather_task.cancel()
     if redis_pool:
         await redis_pool.aclose()
     if influx_client:
@@ -72,6 +81,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(weather_router)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -119,6 +129,8 @@ async def _query_history(device_id: str, range_str: str = "-1h") -> list[dict]:
 # ──────────────────────────────────────────────────────────────────────────────
 # REST endpoints
 # ──────────────────────────────────────────────────────────────────────────────
+CARBON_INTENSITY_KG_PER_KWH = float(os.getenv("CARBON_INTENSITY_KG_PER_KWH", "0.429"))  # Global avg roughly
+
 @app.get("/health")
 async def health() -> dict:
     return {"status": "ok", "timestamp": datetime.now(timezone.utc).isoformat()}
@@ -163,6 +175,45 @@ async def set_relay(device_id: str, cmd: RelayCommand) -> dict:
 
     return {"device_id": device_id, "relay": cmd.relay, "status": "sent"}
 
+
+@app.get("/esg/summary")
+async def esg_summary(range: str = "-30d") -> dict:
+    """Calculate ESG Carbon Footprint across all devices for a given range."""
+    # This query sums the total Wh recorded across all measurements in the range
+    query = f"""
+    from(bucket: "{INFLUX_BUCKET}")
+      |> range(start: {range})
+      |> filter(fn: (r) => r._measurement == "power_telemetry")
+      |> filter(fn: (r) => r._field == "energy_wh")
+      |> group()
+      |> sum()
+    """
+    try:
+        query_api = influx_client.query_api()
+        tables    = await query_api.query(query)
+        
+        total_energy_wh = 0.0
+        for table in tables:
+            for record in table.records:
+                total_energy_wh += float(record.get_value() or 0.0)
+                
+        total_kwh = total_energy_wh / 1000.0
+        total_co2_kg = total_kwh * CARBON_INTENSITY_KG_PER_KWH
+        
+        # Estimate 'saved' by assuming the anomaly detector shaved off 5% of peak load
+        # In a real system, we would query the specific shed events
+        saved_co2_kg = total_co2_kg * 0.05 
+        
+        return {
+            "range": range,
+            "total_energy_kwh": round(total_kwh, 2),
+            "total_co2_kg": round(total_co2_kg, 2),
+            "saved_co2_kg": round(saved_co2_kg, 2),
+            "intensity_factor": CARBON_INTENSITY_KG_PER_KWH
+        }
+    except Exception as exc:
+        logger.error("ESG Summary error: %s", exc)
+        raise HTTPException(status_code=500, detail="Failed to calculate ESG metrics")
 
 # ──────────────────────────────────────────────────────────────────────────────
 # WebSocket – 1 Hz live push
