@@ -98,7 +98,7 @@ def on_message(client: mqtt.Client, userdata: None, msg: mqtt.MQTTMessage) -> No
         .field("power_w",   power_w)
         .field("energy_wh", energy_wh)
         .field("relay",     int(relay_state))
-        .time(ts, WritePrecision.SECONDS)
+        .time(ts, WritePrecision.S)
     )
     try:
         write_api.write(bucket=INFLUX_BUCKET, record=point)
