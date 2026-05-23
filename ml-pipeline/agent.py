@@ -11,6 +11,7 @@ import logging
 import os
 import time
 from datetime import timezone, datetime
+from concurrent.futures import ThreadPoolExecutor
 
 try:
     from dotenv import load_dotenv
@@ -73,6 +74,54 @@ def _check_override(device_id: str) -> bool:
     return False
 
 
+def _process_device(state: dict, nilm_model) -> None:
+    try:
+        device_id = state["device_id"]
+        power_w   = float(state.get("power_w", 0))
+        ts        = datetime.now(timezone.utc).timestamp()
+
+        # ── NILM inference ────────────────────────────────────────────
+        cache = _power_cache.setdefault(device_id, [])
+        cache.append(power_w)
+        if len(cache) > NILM_WINDOW:
+            cache.pop(0)
+
+        if nilm_model and len(cache) >= 2:
+            series  = pd.Series(cache)
+            feats   = extract_features(series)
+            label   = predict(feats, nilm_model)
+            # Store inference result in Redis
+            redis_client.setex(
+                f"sight:nilm:{device_id}",
+                10,
+                json.dumps({"appliance": label, "power_w": power_w}),
+            )
+
+        # ── Check for manual override ─────────────────────────────────
+        if _check_override(device_id):
+            detector.set_override(device_id, True)
+        else:
+            detector.clear_override(device_id)
+
+        # ── Anomaly detection + load-shedding ─────────────────────────
+        result = detector.ingest(device_id, power_w, ts)
+        if result["anomaly"]:
+            logger.warning(
+                "[ANOMALY] %s power=%.2fW avg=%.2fW ratio=%.2f",
+                device_id, power_w, result["rolling_avg"], result["ratio"],
+            )
+        if result["shed"]:
+            _publish_shed(device_id)
+
+        # Store anomaly result in Redis
+        redis_client.setex(
+            f"sight:anomaly:{device_id}",
+            30,
+            json.dumps({k: result[k] for k in ("anomaly", "ratio", "rolling_avg", "shed", "reason")}),
+        )
+    except Exception as exc:
+        logger.error("Error processing device %s: %s", state.get("device_id", "unknown"), exc)
+
 def main() -> None:
     logger.info("Sight ML Agent started")
 
@@ -83,59 +132,24 @@ def main() -> None:
         nilm_model = None
         logger.warning("No NILM model found – NILM classification disabled")
 
-    while True:
-        try:
-            states = _get_all_live_states()
+    max_workers = int(os.getenv("MAX_WORKERS", "20"))
+    
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        while True:
+            try:
+                states = _get_all_live_states()
+                
+                # Submit tasks for all devices to run in parallel
+                futures = [executor.submit(_process_device, state, nilm_model) for state in states]
+                
+                # Wait for all tasks in this tick to complete
+                for future in futures:
+                    future.result()
+                    
+            except Exception as exc:  # noqa: BLE001
+                logger.error("Agent loop error: %s", exc)
 
-            for state in states:
-                device_id = state["device_id"]
-                power_w   = float(state.get("power_w", 0))
-                ts        = datetime.now(timezone.utc).timestamp()
-
-                # ── NILM inference ────────────────────────────────────────────
-                cache = _power_cache.setdefault(device_id, [])
-                cache.append(power_w)
-                if len(cache) > NILM_WINDOW:
-                    cache.pop(0)
-
-                if nilm_model and len(cache) >= 2:
-                    series  = pd.Series(cache)
-                    feats   = extract_features(series)
-                    label   = predict(feats, nilm_model)
-                    # Store inference result in Redis
-                    redis_client.setex(
-                        f"sight:nilm:{device_id}",
-                        10,
-                        json.dumps({"appliance": label, "power_w": power_w}),
-                    )
-
-                # ── Check for manual override ─────────────────────────────────
-                if _check_override(device_id):
-                    detector.set_override(device_id, True)
-                else:
-                    detector.clear_override(device_id)
-
-                # ── Anomaly detection + load-shedding ─────────────────────────
-                result = detector.ingest(device_id, power_w, ts)
-                if result["anomaly"]:
-                    logger.warning(
-                        "[ANOMALY] %s power=%.2fW avg=%.2fW ratio=%.2f",
-                        device_id, power_w, result["rolling_avg"], result["ratio"],
-                    )
-                if result["shed"]:
-                    _publish_shed(device_id)
-
-                # Store anomaly result in Redis
-                redis_client.setex(
-                    f"sight:anomaly:{device_id}",
-                    30,
-                    json.dumps({k: result[k] for k in ("anomaly", "ratio", "rolling_avg", "shed", "reason")}),
-                )
-
-        except Exception as exc:  # noqa: BLE001
-            logger.error("Agent loop error: %s", exc)
-
-        time.sleep(LOOP_INTERVAL)
+            time.sleep(LOOP_INTERVAL)
 
 
 if __name__ == "__main__":

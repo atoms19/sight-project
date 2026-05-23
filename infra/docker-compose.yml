@@ -149,7 +149,7 @@ services:
       ANOMALY_THRESHOLD: "1.5"
       ROLLING_WINDOW:   "604800"
     volumes:
-      - models-data:/models
+      - ../ml-pipeline/nilm_rf.pkl:/models/nilm_rf.pkl:ro
     depends_on:
       redis:  { condition: service_healthy }
       broker: { condition: service_started }

@@ -31,13 +31,7 @@
 #ifndef MQTT_PORT
 #define MQTT_PORT 1883
 #endif
-#ifndef DEVICE_ID
-#define DEVICE_ID "esp32_meter_01"
-#endif
-
-// MQTT topics
-#define TOPIC_TELEMETRY "sight/meters/" DEVICE_ID "/telemetry"
-#define TOPIC_CMD       "sight/meters/" DEVICE_ID "/cmd"
+// DEVICE_ID and MQTT topics are dynamically generated from MAC address
 
 // GPIO
 #define PIN_CURRENT_SENSOR  34  // ADC1_CH6 – ACS712 output
@@ -76,7 +70,9 @@ unsigned long lastSampleMs  = 0;
 unsigned long lastPublishMs = 0;
 
 bool relayState = false;
-char deviceId[] = DEVICE_ID;
+char deviceId[32] = "meter_unknown";
+char topicTelemetry[64] = "sight/meters/unknown/telemetry";
+char topicCmd[64]       = "sight/meters/unknown/cmd";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // EEPROM helpers
@@ -122,6 +118,14 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 void connectWifi() {
     Serial.printf("[WiFi] Connecting to %s", WIFI_SSID);
     WiFi.mode(WIFI_STA);
+    
+    // Auto-generate unique Device ID and MQTT topics based on the hardware MAC address
+    uint8_t mac[6];
+    WiFi.macAddress(mac);
+    snprintf(deviceId, sizeof(deviceId), "meter_%02x%02x%02x%02x%02x%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    snprintf(topicTelemetry, sizeof(topicTelemetry), "sight/meters/%s/telemetry", deviceId);
+    snprintf(topicCmd, sizeof(topicCmd), "sight/meters/%s/cmd", deviceId);
+    
     WiFi.begin(WIFI_SSID, WIFI_PASS);
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
@@ -138,7 +142,7 @@ void mqttReconnect() {
         Serial.print("[MQTT] Connecting...");
         if (mqttClient.connect(deviceId)) {
             Serial.println(" connected");
-            mqttClient.subscribe(TOPIC_CMD);
+            mqttClient.subscribe(topicCmd);
         } else {
             Serial.printf(" failed rc=%d – retry in 5 s\n", mqttClient.state());
             delay(5000);
@@ -201,7 +205,7 @@ void publishTelemetry() {
 
     char buf[256];
     size_t n = serializeJson(doc, buf, sizeof(buf));
-    mqttClient.publish(TOPIC_TELEMETRY, buf, n);
+    mqttClient.publish(topicTelemetry, buf, n);
 
     Serial.printf("[TEL] I=%.3fA V=%.1fV P=%.2fW relay=%d\n",
                   irms, vrms, power, (int)relayState);
