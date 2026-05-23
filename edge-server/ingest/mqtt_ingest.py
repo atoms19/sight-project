@@ -52,16 +52,23 @@ redis_client  = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=T
 def _ensure_retention_policy() -> None:
     """Create 90-day retention policy bucket if it doesn't exist yet."""
     buckets_api = influx_client.buckets_api()
-    existing = [b.name for b in buckets_api.find_buckets().buckets]
-    if INFLUX_BUCKET not in existing:
-        from influxdb_client.domain.bucket_retention_rules import BucketRetentionRules
-        rule = BucketRetentionRules(type="expire", every_seconds=90 * 24 * 3600)
-        buckets_api.create_bucket(
-            bucket_name=INFLUX_BUCKET,
-            retention_rules=rule,
-            org=INFLUX_ORG,
-        )
-        logger.info("Created bucket '%s' with 90-day retention", INFLUX_BUCKET)
+    for _ in range(12):
+        try:
+            existing = [b.name for b in buckets_api.find_buckets().buckets]
+            if INFLUX_BUCKET not in existing:
+                from influxdb_client.domain.bucket_retention_rules import BucketRetentionRules
+                rule = BucketRetentionRules(type="expire", every_seconds=90 * 24 * 3600)
+                buckets_api.create_bucket(
+                    bucket_name=INFLUX_BUCKET,
+                    retention_rules=rule,
+                    org=INFLUX_ORG,
+                )
+                logger.info("Created bucket '%s' with 90-day retention", INFLUX_BUCKET)
+            return
+        except Exception as e:
+            logger.warning("Could not connect to InfluxDB, retrying in 5s... (%s)", e)
+            time.sleep(5)
+    logger.error("Failed to connect to InfluxDB after retries.")
 
 
 # ──────────────────────────────────────────────────────────────────────────────

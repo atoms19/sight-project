@@ -1,0 +1,7 @@
+src/pages/Dashboard.tsx(3,1): error TS6133: 'motion' is declared but its value is never read.
+src/pages/Dashboard.tsx(4,1): error TS6192: All imports in import declaration are unused.
+src/pages/Dashboard.tsx(10,1): error TS6133: 'EnergyHistoryChart' is declared but its value is never read.
+src/pages/Dashboard.tsx(11,1): error TS6133: 'ActivityFeed' is declared but its value is never read.
+src/pages/Dashboard.tsx(12,1): error TS6133: 'QuickActions' is declared but its value is never read.
+src/pages/Facilities3D.tsx(42,15): error TS2322: Type '{ children: Element; geometry: BufferGeometry<NormalBufferAttributes, BufferGeometryEventMap>; }' is not assignable to type 'SVGLineElementAttributes<SVGLineElement>'.
+  Property 'geometry' does not exist on type 'SVGLineElementAttributes<SVGLineElement>'.

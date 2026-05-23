@@ -72,10 +72,10 @@ const App: React.FC = () => {
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <header style={styles.header}>
         <div style={styles.headerBrand}>
-          <span style={styles.logo} aria-label="Sight">⚡</span>
+          <span style={styles.logo} aria-label="Sight"></span>
           <div>
-            <h1 style={styles.logoText}>Sight</h1>
-            <p style={styles.subtitle}>Edge-AI Building Optimiser</p>
+            <h1 style={styles.logoText}>CODEX</h1>
+            <p style={styles.subtitle}>Energy Monitoring System</p>
           </div>
         </div>
 
@@ -197,134 +197,152 @@ const App: React.FC = () => {
 /* ── Inline styles (dark-mode, slate palette) ─────────────────────────────── */
 const styles: Record<string, React.CSSProperties> = {
   app: {
-    minHeight:     '100vh',
-    display:       'flex',
+    minHeight: '100vh',
+    display: 'flex',
     flexDirection: 'column',
-    background:    '#0f172a',
+    // Zinc-950: Deeper, more neutral professional black
+    background: '#09090b', 
+    color: '#fafafa',
+    fontFamily: 'Inter, system-ui, sans-serif',
   },
 
-  /* Header */
+  /* Header - Compact & High Contrast */
   header: {
-    display:        'flex',
-    alignItems:     'center',
-    gap:            16,
-    padding:        '12px 24px',
-    borderBottom:   '1px solid #1e293b',
-    background:     '#0d1526',
-    position:       'sticky',
-    top:            0,
-    zIndex:         10,
-    flexWrap:       'wrap',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 20,
+    padding: '8px 20px', // Thinner header for more workspace
+    borderBottom: '1px solid #27272a', // Zinc-800
+    background: '#09090b',
+    position: 'sticky',
+    top: 0,
+    zIndex: 10,
+    flexWrap: 'wrap',
   },
   headerBrand: {
-    display:    'flex',
+    display: 'flex',
     alignItems: 'center',
-    gap:        10,
+    gap: 12,
     flexShrink: 0,
   },
   logo: {
-    fontSize:   28,
+    fontSize: 22,
     lineHeight: 1,
   },
   logoText: {
-    fontSize:   18,
-    fontWeight: 800,
-    color:      '#38bdf8',
+    fontSize: 14,
+    fontWeight: 700,
+    letterSpacing: '-0.02em',
+    color: '#10b981', // Emerald-500: Standard for Energy/Go/Work
+    textTransform: 'uppercase',
     lineHeight: 1.1,
   },
   subtitle: {
-    color:    '#475569',
+    color: '#71717a', // Zinc-400
     fontSize: 11,
+    fontWeight: 500,
   },
   headerNav: {
-    display:  'flex',
-    gap:      4,
-    flex:     1,
+    display: 'flex',
+    gap: 8,
+    flex: 1,
     flexWrap: 'wrap',
   },
   navLink: {
-    color:        '#64748b',
-    fontSize:     13,
-    fontWeight:   500,
-    padding:      '4px 10px',
-    borderRadius: 6,
-    transition:   'color 0.15s, background 0.15s',
+    color: '#a1a1aa', // Zinc-400
+    fontSize: 13,
+    fontWeight: 500,
+    padding: '6px 12px',
+    borderRadius: 4,
+    transition: 'all 0.2s ease',
     textDecoration: 'none',
+    border: '1px solid transparent',
   },
+  // Note: For active state, use background: '#18181b' and color: '#fff'
+
   headerControls: {
-    display:    'flex',
+    display: 'flex',
     alignItems: 'center',
-    gap:        10,
+    gap: 12,
     flexShrink: 0,
   },
   select: {
-    background:   '#1e293b',
-    color:        '#e2e8f0',
-    border:       '1px solid #334155',
-    borderRadius: 6,
-    padding:      '6px 12px',
-    fontSize:     13,
-    outline:      'none',
+    background: '#18181b', // Zinc-900
+    color: '#f4f4f5',
+    border: '1px solid #3f3f46', // Zinc-700
+    borderRadius: 4,
+    padding: '4px 10px',
+    fontSize: 12,
+    outline: 'none',
+    cursor: 'pointer',
   },
+  
+  /* Status Badges - Professional "Live" indicator */
   wsBadge: {
-    display:      'flex',
-    alignItems:   'center',
-    gap:          5,
-    fontSize:     12,
-    fontWeight:   600,
-    border:       '1px solid',
-    borderRadius: 99,
-    padding:      '4px 10px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    fontSize: 11,
+    fontWeight: 600,
+    background: 'rgba(16, 185, 129, 0.1)', // Subtle Emerald tint
+    color: '#34d399', 
+    border: '1px solid rgba(16, 185, 129, 0.2)',
+    borderRadius: 4,
+    padding: '2px 8px',
+    textTransform: 'uppercase',
   },
   wsDot: {
-    width:        7,
-    height:       7,
+    width: 6,
+    height: 6,
     borderRadius: '50%',
-    display:      'inline-block',
+    background: '#10b981',
+    boxShadow: '0 0 8px #10b981', // Subtle glow for "Online"
   },
 
   /* Main content */
   main: {
-    flex:          1,
-    display:       'flex',
+    flex: 1,
+    display: 'flex',
     flexDirection: 'column',
-    gap:           28,
-    padding:       '24px',
-    maxWidth:      1400,
-    width:         '100%',
-    margin:        '0 auto',
-    alignSelf:     'stretch',
+    gap: 20,
+    padding: '20px',
+    maxWidth: 1600, // Wider for multi-column dashboards
+    width: '100%',
+    margin: '0 auto',
+    alignSelf: 'stretch',
   },
 
+  /* Card styling for widgets/monitors */
   quickWrapper: {
-    background:   '#1e293b',
-    border:       '1px solid #334155',
-    borderRadius: 10,
-    padding:      16,
+    background: '#18181b', // Zinc-900
+    border: '1px solid #27272a', // Zinc-800
+    borderRadius: 6,
+    padding: '16px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
   },
 
   srOnly: {
     position: 'absolute',
-    width:    1,
-    height:   1,
-    padding:  0,
-    margin:   -1,
+    width: 1,
+    height: 1,
+    padding: 0,
+    margin: -1,
     overflow: 'hidden',
-    clip:     'rect(0,0,0,0)',
-    border:   0,
+    clip: 'rect(0,0,0,0)',
+    border: 0,
   } as React.CSSProperties,
 
   /* Footer */
   footer: {
-    padding:        '14px 24px',
-    borderTop:      '1px solid #1e293b',
-    color:          '#475569',
-    fontSize:       12,
-    display:        'flex',
-    gap:            8,
-    justifyContent: 'center',
-    alignItems:     'center',
+    padding: '12px 24px',
+    borderTop: '1px solid #27272a',
+    background: '#09090b',
+    color: '#52525b', // Zinc-500
+    fontSize: 11,
+    display: 'flex',
+    gap: 16,
+    justifyContent: 'space-between', // Spread info across the bottom
+    alignItems: 'center',
   },
 };
-
 export default App;

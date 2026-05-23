@@ -118,61 +118,76 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ maxItems = 6 }) => {
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    background:   '#1e293b',
-    borderRadius: 10,
-    border:       '1px solid #334155',
-    overflow:     'hidden',
+    background: '#18181b', // Zinc-900
+    borderRadius: 6, // Sharper, professional radius
+    border: '1px solid #27272a', // Zinc-800
+    overflow: 'hidden',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
   },
   empty: {
-    padding: '24px 20px',
-    color:   '#64748b',
-    fontSize: 13,
+    padding: '32px 20px',
+    color: '#52525b', // Zinc-500
+    fontSize: 12,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
   item: {
-    display:    'flex',
-    alignItems: 'flex-start',
-    gap:        12,
-    padding:    '12px 16px',
-    borderBottom: '1px solid #1e293b',
+    display: 'flex',
+    alignItems: 'center', // Centered for cleaner alignment of single-line events
+    gap: 12,
+    padding: '10px 16px',
+    borderBottom: '1px solid #27272a', // Using the subtle border color
     background: 'transparent',
-    transition: 'background 0.15s',
+    transition: 'background 0.1s ease',
+    cursor: 'pointer',
   },
+  /* The "Dot" now acts as a technical status indicator or icon container */
   dot: {
-    width:          30,
-    height:         30,
-    borderRadius:   8,
-    display:        'flex',
-    alignItems:     'center',
+    width: 28,
+    height: 28,
+    borderRadius: 4, // More squared/engineered look
+    display: 'flex',
+    alignItems: 'center',
     justifyContent: 'center',
-    fontSize:       14,
-    flexShrink:     0,
-    marginTop:      1,
+    fontSize: 12,
+    fontWeight: 700,
+    flexShrink: 0,
+    // Note: Background should be dynamic (e.g., Emerald for OK, Red for Alert)
+    // Professional tools often use 15% opacity backgrounds with 100% opacity text
+    background: 'rgba(16, 185, 129, 0.1)', 
+    color: '#10b981',
+    border: '1px solid rgba(16, 185, 129, 0.2)',
   },
   text: {
-    flex:    1,
+    flex: 1,
     minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
   },
   title: {
-    fontSize:  13,
-    fontWeight: 600,
-    color:     '#e2e8f0',
+    fontSize: 13,
+    fontWeight: 500, // Medium weight is cleaner than Bold for dense lists
+    color: '#f4f4f5', // Zinc-100
     whiteSpace: 'nowrap',
-    overflow:  'hidden',
+    overflow: 'hidden',
     textOverflow: 'ellipsis',
+    letterSpacing: '-0.01em',
   },
   detail: {
-    fontSize:  12,
-    color:     '#94a3b8',
-    marginTop: 1,
+    fontSize: 12,
+    color: '#71717a', // Zinc-400
+    marginTop: 0, // Tightened
     whiteSpace: 'nowrap',
-    overflow:  'hidden',
+    overflow: 'hidden',
     textOverflow: 'ellipsis',
   },
   time: {
-    fontSize:  11,
-    color:     '#64748b',
+    fontSize: 11,
+    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', // Monospace feels "log-like"
+    color: '#52525b', // Zinc-500
     flexShrink: 0,
-    paddingTop: 2,
     whiteSpace: 'nowrap',
+    paddingLeft: 8,
   },
 };

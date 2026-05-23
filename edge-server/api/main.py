@@ -146,7 +146,8 @@ async def set_relay(device_id: str, cmd: RelayCommand) -> dict:
     payload = json.dumps({"relay": cmd.relay})
     topic   = f"sight/meters/{device_id}/cmd"
     try:
-        mqtt_publish.single(
+        await asyncio.to_thread(
+            mqtt_publish.single,
             topic,
             payload=payload,
             hostname=MQTT_HOST,

@@ -189,97 +189,115 @@ export const DeviceTable: React.FC<DeviceTableProps> = ({ liveDeviceIds }) => {
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    background:   '#1e293b',
-    borderRadius: 10,
-    border:       '1px solid #334155',
-    overflow:     'hidden',
-    display:      'flex',
+    background: '#18181b', // Zinc-900
+    borderRadius: 6,
+    border: '1px solid #27272a', // Zinc-800
+    overflow: 'hidden',
+    display: 'flex',
     flexDirection: 'column',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.2)',
   },
   tableWrapper: {
     overflowX: 'auto',
+    scrollbarWidth: 'thin',
+    scrollbarColor: '#3f3f46 #09090b',
   },
   table: {
-    width:           '100%',
-    borderCollapse:  'collapse',
-    fontSize:        13,
+    width: '100%',
+    borderCollapse: 'collapse',
+    fontSize: 12, // Reduced for data density
+    lineHeight: '1.2',
   },
   th: {
-    padding:       '10px 16px',
-    textAlign:     'left',
-    color:         '#64748b',
-    fontWeight:    600,
-    fontSize:      12,
+    padding: '12px 16px',
+    textAlign: 'left',
+    background: '#09090b', // Darker "Pinned" header look
+    color: '#71717a', // Zinc-400
+    fontWeight: 700,
+    fontSize: 11,
     textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    borderBottom:  '1px solid #334155',
-    cursor:        'pointer',
-    whiteSpace:    'nowrap',
-    userSelect:    'none',
+    letterSpacing: '0.06em',
+    borderBottom: '2px solid #27272a',
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+    userSelect: 'none',
   },
   tr: {
-    borderBottom: '1px solid #0f172a',
+    borderBottom: '1px solid #27272a',
+    transition: 'background 0.1s ease',
+    // Pro Tip: Apply background: 'rgba(255,255,255,0.02)' to even rows for zebra striping
   },
   td: {
-    padding:   '10px 16px',
-    color:     '#e2e8f0',
+    padding: '10px 16px',
+    color: '#e4e4e7', // Zinc-200
     whiteSpace: 'nowrap',
+    borderBottom: '1px solid #27272a',
   },
   empty: {
-    padding:   '24px 16px',
+    padding: '40px 16px',
     textAlign: 'center',
-    color:     '#64748b',
+    color: '#52525b', // Zinc-500
+    fontSize: 13,
   },
   statusBadge: {
-    fontSize:     11,
-    fontWeight:   700,
-    padding:      '2px 8px',
-    borderRadius: 99,
-    letterSpacing: '0.04em',
+    fontSize: 10,
+    fontWeight: 700,
+    padding: '2px 8px',
+    borderRadius: 4, // Squared for "Industrial" feel
+    letterSpacing: '0.05em',
+    textTransform: 'uppercase',
+    display: 'inline-block',
   },
   deviceId: {
-    fontFamily: 'monospace',
-    fontSize:   12,
-    color:      '#38bdf8',
+    fontFamily: 'ui-monospace, SFMono-Regular, "Roboto Mono", monospace',
+    fontSize: 12,
+    color: '#34d399', // Emerald-400 (The "Live" ID color)
+    fontWeight: 500,
   },
   search: {
-    background:   '#0f172a',
-    border:       '1px solid #334155',
-    borderRadius: 6,
-    padding:      '7px 12px',
-    fontSize:     13,
-    color:        '#e2e8f0',
-    outline:      'none',
-    flex:         1,
-    minWidth:     120,
+    background: '#09090b', // Inset/recessed look
+    border: '1px solid #3f3f46', // Zinc-700
+    borderRadius: 4,
+    padding: '6px 12px',
+    fontSize: 13,
+    color: '#fafafa',
+    outline: 'none',
+    flex: 1,
+    minWidth: 140,
+    transition: 'border-color 0.2s',
   },
   filters: {
-    display:  'flex',
-    gap:      4,
+    display: 'flex',
+    gap: 6,
     flexWrap: 'wrap',
   },
   filterBtn: {
-    border:       '1px solid #334155',
-    borderRadius: 6,
-    padding:      '6px 12px',
-    fontSize:     12,
-    fontWeight:   600,
-    cursor:       'pointer',
-    transition:   'background 0.15s, color 0.15s',
+    background: '#27272a',
+    border: '1px solid #3f3f46',
+    color: '#a1a1aa',
+    borderRadius: 4,
+    padding: '4px 10px',
+    fontSize: 11,
+    fontWeight: 600,
+    textTransform: 'uppercase',
+    cursor: 'pointer',
+    transition: 'all 0.15s',
   },
   sortIconInactive: {
-    color:   '#475569',
-    fontSize: 11,
-    marginLeft: 4,
+    color: '#3f3f46', // Zinc-700
+    fontSize: 10,
+    marginLeft: 6,
   },
   sortIconActive: {
-    color:   '#38bdf8',
-    fontSize: 11,
-    marginLeft: 4,
+    color: '#10b981', // Emerald-500
+    fontSize: 10,
+    marginLeft: 6,
   },
   note: {
-    padding:  '6px 16px 10px',
+    padding: '8px 16px',
     fontSize: 11,
-    color:    '#475569',
+    color: '#52525b', // Zinc-500
+    background: '#09090b',
+    borderTop: '1px solid #27272a',
   },
 };

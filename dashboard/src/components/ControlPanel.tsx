@@ -103,32 +103,40 @@ const Metric: React.FC<MetricProps> = ({ label, value, valueColor = '#e2e8f0' })
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    background: '#1e293b',
-    borderRadius: 8,
-    padding: 16,
-    border: '1px solid #334155',
+    background: '#18181b', // Zinc-900
+    borderRadius: 6,
+    padding: '16px',
+    border: '1px solid #27272a', // Zinc-800
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
   },
   title: {
     marginBottom: 16,
-    color: '#e2e8f0',
-    fontSize: 14,
+    color: '#fafafa', // Zinc-50
+    fontSize: 13, // Slightly smaller for density
     fontWeight: 600,
+    textTransform: 'uppercase', // Professional "Header" look
+    letterSpacing: '0.02em',
   },
   row: {
     display: 'flex',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   label: {
-    color: '#94a3b8',
-    fontSize: 13,
+    color: '#71717a', // Zinc-400
+    fontSize: 12,
     minWidth: 80,
+    fontWeight: 500,
   },
   badge: {
-    fontSize: 12,
+    fontSize: 10, // Small but punchy
     fontWeight: 700,
     letterSpacing: '0.05em',
+    textTransform: 'uppercase',
+    padding: '2px 6px',
+    borderRadius: 4,
+    // Note: Style mapping should handle color (e.g., bg: rgba(16, 185, 129, 0.1))
   },
   metrics: {
     display: 'grid',
@@ -137,35 +145,45 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: 16,
   },
   metric: {
-    background: '#0f172a',
-    borderRadius: 6,
-    padding: '8px 12px',
+    background: '#09090b', // Zinc-950: Darker than container for a "recessed" look
+    borderRadius: 4,
+    padding: '10px 12px',
     display: 'flex',
     flexDirection: 'column',
-    gap: 2,
+    gap: 4,
+    border: '1px solid #27272a',
   },
   metricLabel: {
-    color: '#94a3b8',
-    fontSize: 11,
+    color: '#52525b', // Zinc-500
+    fontSize: 10,
+    fontWeight: 600,
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
   },
   metricValue: {
     fontSize: 18,
     fontWeight: 700,
+    color: '#10b981', // Emerald-500 for the actual "data"
+    fontFamily: 'ui-monospace, SFMono-Regular, "Roboto Mono", monospace', // Monospace is key for monitoring
   },
   btn: {
-    border: 'none',
-    borderRadius: 6,
+    border: '1px solid #3f3f46', // Zinc-700
+    background: '#27272a', // Zinc-800
+    color: '#fafafa',
+    borderRadius: 4,
     padding: '8px 16px',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: 600,
-    opacity: 1,
-    transition: 'opacity 0.2s',
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+    width: '100%', // Full width buttons feel more like "Controls"
   },
   feedback: {
-    marginTop: 8,
-    fontSize: 12,
-    color: '#94a3b8',
+    marginTop: 10,
+    fontSize: 11,
+    color: '#52525b', // Zinc-500
+    display: 'flex',
+    alignItems: 'center',
+    gap: 4,
   },
 };

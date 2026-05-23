@@ -40,19 +40,22 @@ class RollingAverage:
         self._window = window_seconds
         # deque of (epoch_seconds, value)
         self._buf: deque[tuple[float, float]] = deque()
+        self._running_sum = 0.0  # Track running sum for O(1) average
 
     def add(self, value: float, ts: float | None = None) -> None:
         now = ts if ts is not None else datetime.now(timezone.utc).timestamp()
         self._buf.append((now, value))
+        self._running_sum += value  # Add new value to sum
         cutoff = now - self._window
         while self._buf and self._buf[0][0] < cutoff:
-            self._buf.popleft()
+            _, popped_val = self._buf.popleft()
+            self._running_sum -= popped_val  # Subtract old value from sum
 
     @property
     def average(self) -> float:
         if not self._buf:
             return 0.0
-        return sum(v for _, v in self._buf) / len(self._buf)
+        return self._running_sum / len(self._buf)
 
     @property
     def count(self) -> int:

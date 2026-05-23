@@ -1,114 +1,174 @@
-/* Sight Dashboard – global styles */
+/* Sight Dashboard – Professional Industrial Theme */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: #0f172a;
-  color: #e2e8f0;
-  min-height: 100vh;
+:root {
+  /* Core Palette: Zinc/Neutral (The "Engineered" Look) */
+  --color-bg:           #09090b; /* Zinc-950 */
+  --color-surface:      #18181b; /* Zinc-900 */
+  --color-surface-soft: #27272a; /* Zinc-800 */
+  --color-border:       #27272a; /* Zinc-800 */
+  --color-border-hover: #3f3f46; /* Zinc-700 */
+  
+  /* Functional Accents */
+  --color-primary:      #10b981; /* Emerald-500 (Energy/Efficiency) */
+  --color-success:      #10b981;
+  --color-warning:      #f59e0b; /* Amber-500 */
+  --color-danger:       #ef4444; /* Red-500 */
+  
+  /* Text */
+  --color-text:         #fafafa; /* Zinc-50 */
+  --color-text-muted:   #71717a; /* Zinc-400 */
+  --color-text-dim:     #52525b; /* Zinc-500 */
+
+  /* Precision Spacing & Radii */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --gap-sm:    12px;
+  --gap-md:    20px;
+  --gap-lg:    32px;
+  
+  /* Data Font (Optional but recommended for numbers) */
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', monospace;
 }
 
-:root {
-  --color-primary:    #38bdf8;
-  --color-success:    #4ade80;
-  --color-warning:    #fb923c;
-  --color-danger:     #f87171;
-  --color-surface:    #1e293b;
-  --color-border:     #334155;
-  --color-text-muted: #94a3b8;
-  --color-bg:         #0f172a;
-
-  --radius-md: 10px;
-  --gap-md:    16px;
-  --gap-lg:    24px;
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
 }
 
 a {
   color: var(--color-primary);
   text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+a:hover {
+  opacity: 0.8;
 }
 
 button {
   cursor: pointer;
   font-family: inherit;
+  border: none;
+  background: none;
 }
 
-/* ── Responsive layout helpers ── */
+/* ── Layout Framework ── */
 
-/* KPI grid: 4 cols on desktop, 2 on tablet, 1 on mobile */
+/* KPI grid: Tightened for data density */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--gap-md);
 }
 
-/* Main content two-column: charts left, side panel right */
+/* Main content: Asymmetric for technical focus */
 .main-grid {
   display: grid;
-  grid-template-columns: 1fr 280px;
+  grid-template-columns: 1fr 320px; /* Slightly wider sidebar for controls */
   gap: var(--gap-md);
   align-items: start;
 }
 
-/* Bottom two-column: activity feed + quick actions */
 .bottom-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.5fr 1fr; /* Emphasize activity feed over actions */
   gap: var(--gap-md);
   align-items: start;
 }
 
-/* Quick actions button grid */
 .quick-actions-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
 }
 
-/* Device table toolbar */
+/* Device table toolbar: Refined and subtle */
 .table-toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid #334155;
+  padding: 10px 16px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
 }
 
-/* ── Nav link hover (handled via CSS since inline styles can't use :hover) ── */
+/* ── Interactive Elements ── */
+
+a.nav-link {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
 a.nav-link:hover {
-  color: #e2e8f0;
-  background: #1e293b;
+  color: var(--color-text);
+  background: var(--color-surface-soft);
 }
 
-/* ── Activity feed hover ── */
+.activity-item {
+  padding: 12px;
+  border-bottom: 1px solid var(--color-border);
+  transition: background 0.1s ease;
+}
+
 .activity-item:hover {
-  background: #0f172a;
+  background: rgba(255, 255, 255, 0.02);
 }
 
-/* ── Button focus rings ── */
-button:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
+/* ── Form & Focus ── */
 
-input:focus-visible {
+button:focus-visible, 
+input:focus-visible,
+select:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 1px;
 }
 
-/* ── Tablet: ≤ 1024px ── */
+/* Custom Scrollbar for that "Pro" feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-soft);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-dim);
+}
+
+/* ── Responsive Overrides ── */
+
+@media (max-width: 1200px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 1024px) {
   .kpi-grid {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .main-grid {
-    grid-template-columns: 1fr;
   }
 
   .bottom-grid {
@@ -116,13 +176,12 @@ input:focus-visible {
   }
 }
 
-/* ── Mobile: ≤ 640px ── */
 @media (max-width: 640px) {
   .kpi-grid {
     grid-template-columns: 1fr;
   }
-
-  .quick-actions-grid {
-    grid-template-columns: repeat(2, 1fr);
+  
+  :root {
+    --gap-md: 12px; /* Tighten on mobile */
   }
 }

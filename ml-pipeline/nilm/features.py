@@ -1,7 +1,3 @@
-"""
-Sight Project – NILM Feature Engineering
-Phase 3: Extract features for Non-Intrusive Load Monitoring classification.
-"""
 
 from __future__ import annotations
 

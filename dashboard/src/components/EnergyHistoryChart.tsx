@@ -94,21 +94,27 @@ export const EnergyHistoryChart: React.FC<EnergyHistoryChartProps> = ({ deviceId
 };
 
 const styles: Record<string, React.CSSProperties> = {
-  container: {
-    background:   '#1e293b',
-    borderRadius: 10,
-    padding:      16,
-    border:       '1px solid #334155',
-  },
-  title: {
-    marginBottom: 12,
-    color:        '#e2e8f0',
-    fontSize:     14,
-    fontWeight:   600,
-  },
-  note: {
-    marginTop: 8,
-    fontSize:  11,
-    color:     '#475569',
-  },
+	container: {
+		background: '#18181b', // Zinc-900
+		borderRadius: 6,
+		border: '1px solid #27272a', // Zinc-800
+		padding: '16px',
+		boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+	},
+	title: {
+		marginBottom: 16,
+		color: '#fafafa', // Zinc-50
+		fontSize: 13,
+		fontWeight: 600,
+		textAlign: 'center',
+	},
+	note: {
+		marginTop: 12,
+		color: '#64748b', // Zinc-500
+		fontSize: 11,
+		textAlign: 'center',
+	},
 };
